@@ -1,0 +1,95 @@
+// bid information to store
+struct Bid {
+    string bidId
+    string title
+    string fund
+    double amount
+    Bid()
+        amount will default to 0.0
+}
+// blueprint for populating the hash table with chaining
+class HashTable {
+    struct Node:
+        initialize bid of type Bid
+        unsigned int key
+        Node *next
+        
+        Node() {
+            Bid bid
+            Set key to max integer
+            Set next to nullptr
+        }
+        Node(Bid aBid) : Node() {
+            Set bid to aBid
+        }
+        Node(Bid aBid, unsigned int aKey) : Node(aBid) {
+            Set key to aKey
+        }
+    vector<Node> nodes
+    set unsigned int tableSize to an immutable value
+}
+
+HashTable::HashTable() {
+    resize nodes vector to tableSize
+}
+
+HashTable::HashTable(unsigned int size) {
+    set tableSize equal to size
+    resize nodes vector to tableSize
+}
+
+HashTable::~HashTable(){
+    for a value i=0 increment it by 1 until i<tableSize
+        initialize Node pointer current = next node
+        while current node != nullptr
+            initialize Node point toDelete = next node
+            delete toDelete node
+}
+
+unsigned int HashTable::hash(int key){
+    return key modulo tableSize
+}
+
+// determines where to put bid information
+void HashTable::Insert(Bid bid) {
+    set currentKey = hashed bidId 
+    if the node at currentKey has a key = max integer
+        set node at currentKey = a new node created using bid and currentKey params
+    else:
+        initialize nextNode pointer = the address of nodes at currentKey
+            while the next node != nullptr
+                set nextNode = next node
+            set the node after nextNode = a new node created using bid and currentKey params
+}
+
+// prints nodes in ascending key order and order added to bucket
+void HashTable::PrintAll() {
+    for each node in nodes
+        print that nodes bid information
+        initialize next point = the next node
+        while next != nullptr
+            print that nodes bid information
+            set next = next node
+}
+
+// removes node with matching bidId
+void HashTable::Remove(string bidId) {
+    set currentKey = hashed bidId 
+    if the nodes bidId = given bidId
+        delete that node
+    else
+        traverse all nodes with currentKey 
+            if the next nodes bidId = given bidId
+                delete that node
+}
+
+// returns node with matching bidId
+void HashTable::Search(bidId) {
+    declare an empty bid
+    if the nodes bidId = given bidId
+        return that nodes bid information
+    else
+        traverse all nodes with currentKey 
+            if the next nodes bidId = given bidId
+                return that nodes bid information
+}
