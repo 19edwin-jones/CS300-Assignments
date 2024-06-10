@@ -223,53 +223,68 @@ void BinarySearchTree::addNode(Node* node, Bid bid) {
         //else
             // recurse down the left node
 
-    Node *current = root;
-    if (current->bid.bidId > bid.bidId) { // node's bidId is larger than search bidId
-        if (current->left == nullptr) {
-            current->left = new Node(bid);
+    Node *current = node;
+    while (current != nullptr) {
+        // node's bidId is larger than search bidId
+        if (current->bid.bidId > bid.bidId) {
+            if (current->left == nullptr) {
+                current->left = new Node(bid);
+                return; // found the location to insert the bid
+            }
+            else {
+                current = current->left; // restart search from that present left node
+            }
         }
+        // node's bidId is smaller than search bidId
         else {
-            while (current->left != nullptr) {
-                current = current->left;
+            if (current->right == nullptr) {
+                current->right = new Node(bid);
+                return; // found the location to insert the bid
             }
-            current->left = new Node(bid);
-        }
-    }
-    else { // node's bidId is smaller than search bidId
-        if (current->right == nullptr) {
-            current->right = new Node(bid);
-        }
-        else { //my FIXME: THIS ALONG WITH THE TOP SHOULD PROBABLY JUST BE IN A WHILE LOOP SIMILAR TO THE ~BinarySearchTree()
-            current = current->right;
-            while (current->left != nullptr) {
-                current = current->left;
+            else {
+                current = current->right; // restart search from that present right node
             }
-            current->left = new Node(bid);
         }
-    }
+    }   
 }
+
+
 void BinarySearchTree::inOrder(Node* node) {
-      // FIXME (3b): Pre order root
-      //if node is not equal to null ptr
-      //InOrder not left
-      //output bidID, title, amount, fund
-      //InOder right
+    // FIXME (3b): Pre order root
+    //if node is not equal to null ptr
+    //InOrder not left
+    //output bidID, title, amount, fund
+    //InOder right
+    if (node != nullptr) {
+        inOrder(node->left);
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+        inOrder(node->right);
+    }
 }
 void BinarySearchTree::postOrder(Node* node) {
-      // FIXME (4b): Pre order root
-      //if node is not equal to null ptr
-      //postOrder left
-      //postOrder right
-      //output bidID, title, amount, fund
-
+    // FIXME (4b): Pre order root
+    //if node is not equal to null ptr
+    //postOrder left
+    //postOrder right
+    //output bidID, title, amount, fund
+    if (node != nullptr) {
+        postOrder(node->left);
+        postOrder(node->right);
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+    }
 }
 
 void BinarySearchTree::preOrder(Node* node) {
-      // FIXME (5b): Pre order root
-      //if node is not equal to null ptr
-      //output bidID, title, amount, fund
-      //postOrder left
-      //postOrder right      
+    // FIXME (5b): Pre order root
+    //if node is not equal to null ptr
+    //output bidID, title, amount, fund
+    //postOrder left
+    //postOrder right
+    if (node != nullptr) {
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+        preOrder(node->left);
+        preOrder(node->right);
+    }
 }
 
 /**
@@ -278,22 +293,63 @@ void BinarySearchTree::preOrder(Node* node) {
 Node* BinarySearchTree::removeNode(Node* node, string bidId) {
     // FIXME (7b) Implement removing a bid from the tree
     // if node = nullptr return node
+
     // (otherwise recurse down the left subtree)
     // check for match and if so, remove left node using recursive call 
+
     // (otherwise recurse down the right subtree)
     // check for match and if so, remove right node using recursive call
+
     // (otherwise no children so node is a leaf node)
     // if left node = nullptr && right node = nullptr delete node 
+
     // (otherwise check one child to the left)
     // if left node != nullptr && right node = nullptr delete node 
     // (otherwise check one child to the right)
     // if left node = nullptr && right node != nullptr delete node
+
     // (otherwise more than one child so find the minimum)
     // create temp node to right
     // while left node is not nullptr keep moving temp left
     // make node bid (right) equal to temp bid (left)
     // remove right node using recursive call
     // return node
+
+    // bidId is not found
+    if (node == nullptr) {
+        return node;
+    }
+
+    //bidId is smaller than current node
+    if (bidId < node->bid.bidId) {
+        node->left = removeNode(node->left, bidId);
+        return node;
+    }
+    else if (bidId > node->bid.bidId) {
+        node->right = removeNode(node->right, bidId);
+        return node;
+    }
+
+    // node has one child or no child
+    if (node->left == nullptr) {
+        Node *temp = node->right;
+        delete node;
+        return temp;
+    }
+    else if (node->right == nullptr) {
+        Node *temp = node->left;
+        delete node;
+        return temp;
+    }
+
+    // node has two children
+    Node *tempNode = node->right;
+    while (node->left != nullptr) {
+        tempNode = tempNode->left;
+    }
+    node->bid = tempNode->bid;
+    node->right = removeNode(node->right, tempNode->bid.bidId);
+    return node;
 }
 
 
