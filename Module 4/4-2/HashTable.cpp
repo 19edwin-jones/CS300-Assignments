@@ -229,7 +229,7 @@ void HashTable::Remove(string bidId) {
     // FIXME (6): Implement logic to remove a bid
     // set key equal to hash atoi bidID cstring
     // erase node begin and key
-    https://eng.libretexts.org/Courses/Delta_College/C_-_Data_Structures/07%3A_Linked_Lists/7.10%3A_Linked_List_Node_Delete
+    //https://eng.libretexts.org/Courses/Delta_College/C_-_Data_Structures/07%3A_Linked_Lists/7.10%3A_Linked_List_Node_Delete
 
     unsigned int currentKey = hash(stoi(bidId));
     
