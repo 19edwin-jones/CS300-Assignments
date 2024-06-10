@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <time.h>
+#include <algorithm>
 
 #include "CSVparser.hpp"
 
@@ -94,6 +95,28 @@ BinarySearchTree::BinarySearchTree() {
 BinarySearchTree::~BinarySearchTree() {
     //FixMe (2)
     // recurse from root deleting every node
+
+    Node *current = root;
+    while (current != nullptr) { // starting from root, traverse down left-most node until leaf node found
+
+        // improve readability by using bool flags to track search status
+        bool foundLeft = true;
+        bool foundRight = true;
+
+        while (foundLeft || foundRight){ // current node is not a leaf node
+            if (current->left != nullptr) { // only check for left node until no left node found
+                current = current->left;
+                continue;
+            }
+            foundLeft = false; // found no left node
+            if (current->right != nullptr) { // check for right node
+                current = current->right;
+                continue;
+            }
+            foundRight = false; // no right node
+        }
+        delete current; // found leaf node, delete it
+    }
 }
 
 /**
@@ -127,10 +150,19 @@ void BinarySearchTree::PreOrder() {
  */
 void BinarySearchTree::Insert(Bid bid) {
     // FIXME (6a) Implement inserting a bid into the tree
+    /*
     // if root equarl to null ptr
       // root is equal to new node bid
     // else
       // add Node root and bid
+    */
+
+    if (root == nullptr) {
+        root = new Node(bid);
+    }
+    else {
+        addNode(root, bid);
+    }
 }
 
 /**
@@ -146,6 +178,7 @@ void BinarySearchTree::Remove(string bidId) {
  */
 Bid BinarySearchTree::Search(string bidId) {
     // FIXME (8) Implement searching the tree for a bid
+    /*
     // set current node equal to root
 
     // keep looping downwards until bottom reached or matching bidId found
@@ -153,7 +186,34 @@ Bid BinarySearchTree::Search(string bidId) {
 
         // if bid is smaller than current node then traverse left
         // else larger so traverse right
-    Bid bid;
+
+    */
+
+    Node *current = root;
+
+    while (current != nullptr) { 
+        if (current->bid.bidId == bidId) { // found the bid
+            return current->bid;
+        }
+        else if (current->bid.bidId > bidId) { // check left node
+            if (current->left != nullptr) {
+                current = current->left;
+            }
+            else {
+                break; // no left node to search
+            }
+        }
+        else { // check right node
+            if (current->right != nullptr) {
+                current = current->right;
+            }
+            else {
+                break; // no right node to search
+            }
+        }
+    }
+    // can only be reached if bid not found, otherwise this won't run
+    Bid bid; // create an empty bid
     return bid;
 }
 
@@ -165,6 +225,7 @@ Bid BinarySearchTree::Search(string bidId) {
  */
 void BinarySearchTree::addNode(Node* node, Bid bid) {
     // FIXME (6b) Implement inserting a bid into the tree
+    /*
     // if node is larger then add to left
         // if no left node
             // this node becomes left
@@ -174,29 +235,79 @@ void BinarySearchTree::addNode(Node* node, Bid bid) {
             // this node becomes right
         //else
             // recurse down the left node
+    */
+
+    Node *current = node;
+    while (current != nullptr) {
+        // node's bidId is larger than search bidId
+        if (current->bid.bidId > bid.bidId) {
+            if (current->left == nullptr) {
+                current->left = new Node(bid);
+                return; // found the location to insert the bid
+            }
+            else {
+                current = current->left; // restart search from that present left node
+            }
+        }
+        // node's bidId is smaller than search bidId
+        else {
+            if (current->right == nullptr) {
+                current->right = new Node(bid);
+                return; // found the location to insert the bid
+            }
+            else {
+                current = current->right; // restart search from that present right node
+            }
+        }
+    }   
 }
+
+
 void BinarySearchTree::inOrder(Node* node) {
-      // FixMe (3b): Pre order root
-      //if node is not equal to null ptr
-      //InOrder not left
-      //output bidID, title, amount, fund
-      //InOder right
+    // FIXME (3b): Pre order root
+    /*
+    //if node is not equal to null ptr
+    //InOrder not left
+    //output bidID, title, amount, fund
+    //InOder right
+    */
+
+    if (node != nullptr) {
+        inOrder(node->left);
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+        inOrder(node->right);
+    }
 }
 void BinarySearchTree::postOrder(Node* node) {
-      // FixMe (4b): Pre order root
-      //if node is not equal to null ptr
-      //postOrder left
-      //postOrder right
-      //output bidID, title, amount, fund
+    // FIXME (4b): Pre order root
+    /*
+    //if node is not equal to null ptr
+    //postOrder left
+    //postOrder right
+    //output bidID, title, amount, fund
+    */
 
+    if (node != nullptr) {
+        postOrder(node->left);
+        postOrder(node->right);
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+    }
 }
 
 void BinarySearchTree::preOrder(Node* node) {
-      // FixMe (5b): Pre order root
-      //if node is not equal to null ptr
-      //output bidID, title, amount, fund
-      //postOrder left
-      //postOrder right      
+    // FIXME (5b): Pre order root
+    /*
+    //if node is not equal to null ptr
+    //output bidID, title, amount, fund
+    //postOrder left
+    //postOrder right
+    */
+
+    if (node != nullptr) {
+        cout << node->bid.bidId << ": " << node->bid.title << " | " << node->bid.amount << " | " << node->bid.fund << endl;
+        preOrder(node->left);
+        preOrder(node->right);
+    }
 }
 
 /**
@@ -204,6 +315,7 @@ void BinarySearchTree::preOrder(Node* node) {
  */
 Node* BinarySearchTree::removeNode(Node* node, string bidId) {
     // FIXME (7b) Implement removing a bid from the tree
+    /*
     // if node = nullptr return node
     // (otherwise recurse down the left subtree)
     // check for match and if so, remove left node using recursive call 
@@ -221,6 +333,58 @@ Node* BinarySearchTree::removeNode(Node* node, string bidId) {
     // make node bid (right) equal to temp bid (left)
     // remove right node using recursive call
     // return node
+    */
+
+    // bidId is not found
+    if (node == nullptr) {
+        return node;
+    }
+
+    //bidId is smaller than current node
+    if (bidId < node->bid.bidId) {
+        node->left = removeNode(node->left, bidId);
+        return node;
+    }
+    //bidId is larger than current node
+    else if (bidId > node->bid.bidId) {
+        node->right = removeNode(node->right, bidId);
+        return node;
+    }
+    
+    // node is a leaf node
+    if (node->left == nullptr && node->right == nullptr) {
+        delete node;
+        return nullptr;
+    }
+    // node has one child
+    else if (node->left != nullptr && node->right == nullptr) {
+        Node *temp = node->left;
+        delete node;
+        return temp;
+    }
+    // node has one child
+    else if (node->left == nullptr && node->right != nullptr) {
+        Node *temp = node->right;
+        delete node;
+        return temp;
+    }
+    // node has two children, return smallest node in right subtree
+    else {
+        Node *tempRoot = node;
+        Node *temp = node->right;
+        while (temp->left != nullptr) {
+            tempRoot = temp->left;
+        }
+        node->bid = temp->bid;
+        if (tempRoot->left == temp) {
+            tempRoot->left = temp->right;
+        }
+        else {
+            tempRoot->right = temp->right;
+        }
+        delete temp;
+        return node;
+    }
 }
 
 
@@ -310,8 +474,10 @@ int main(int argc, char* argv[]) {
         bidKey = argv[2];
         break;
     default:
-        csvPath = "eBid_Monthly_Sales.csv";
+        csvPath = "CS 300 eBid_Monthly_Sales.csv";
         bidKey = "98223";
+        //bidKey = "98911";
+        //bidKey = "98907";
     }
 
     // Define a timer variable
