@@ -231,40 +231,10 @@ void HashTable::Remove(string bidId) {
     // erase node begin and key
     //https://eng.libretexts.org/Courses/Delta_College/C_-_Data_Structures/07%3A_Linked_Lists/7.10%3A_Linked_List_Node_Delete
 
-    unsigned int currentKey = hash(stoi(bidId));
-    
-
-    //USING DELETE FUNCTION TO REMOVE NODES FROM MEMORY
-    /*if the first node has the matching bidId, delete the node from 
-    memory rather than emptying the nodes variables to prevent memory leaks*/
-    if (nodes.at(currentKey).bid.bidId == bidId) {
-        Node *tempNode = nodes.at(currentKey).next;
-        nodes.at(currentKey) = *tempNode;
-        delete tempNode;
-        cout << "Bid Id " << tempNode->bid.bidId << endl;
-        cout << "Bid Title " << tempNode->bid.title << endl;
-        cout << "Bid Fund " << tempNode->bid.fund << endl;
-        cout << "Bid Amount " << tempNode->bid.amount << endl;
-        return;
-    }
-    // first node does not have matching bidId, check the rest of the nodes
-    else {
-        Node *nextNode = nodes.at(currentKey).next;
-        Node *prevNode = &nodes.at(currentKey);
-        while (nextNode != nullptr) {
-            if (nextNode->bid.bidId == bidId) {
-                prevNode->next = nextNode->next;
-                delete nextNode;
-                cout << "Bid Id " << nextNode->bid.bidId << endl;
-                cout << "Bid Title " << nextNode->bid.title << endl;
-                cout << "Bid Fund " << nextNode->bid.fund << endl;
-                cout << "Bid Amount " << nextNode->bid.amount << endl;
-                return;
-            }
-            prevNode = nextNode;
-            nextNode = nextNode->next;
-        }
-    }
+    //unsigned int currentKey = hash(stoi(bidId));
+    //USING ERASE FUNCTION
+    unsigned int key = hash(atoi(bidId.c_str()));
+    nodes.erase(nodes.begin() + key);
 
 }
 /**
@@ -293,6 +263,11 @@ Bid HashTable::Search(string bidId) {
     unsigned int currentKey = hash(stoi(bidId));
     // check if the first node has the matching bidId
     if (nodes.at(currentKey).bid.bidId == bidId) {
+        cout << "Key: " << currentKey << 
+                " | Bid ID: " << nodes.at(currentKey).bid.bidId << 
+                " | Title: " << nodes.at(currentKey).bid.title << 
+                " | Amount: " << nodes.at(currentKey).bid.amount << 
+                " | Fund: " << nodes.at(currentKey).bid.fund << endl;
         return nodes.at(currentKey).bid;
     } 
 
@@ -303,6 +278,11 @@ Bid HashTable::Search(string bidId) {
         while (nextNode != nullptr) {
             // check if the node matches the bidId
             if (nextNode->bid.bidId == bidId) { 
+                cout << "Key: " << currentKey << 
+                        " | Bid ID: " << nextNode->bid.bidId << 
+                        " | Title: " << nextNode->bid.title << 
+                        " | Amount: " << nextNode->bid.amount << 
+                        " | Fund: " << nextNode->bid.fund << endl;
                 return nextNode->bid;
             }
             // move to the next node
@@ -400,10 +380,17 @@ int main(int argc, char* argv[]) {
         csvPath = "CS 300 eBid_Monthly_Sales.csv"; // 12023 entries
         //csvPath = "CS 300 eBid_Monthly_Sales_Dec_2016.csv"; // 76 entries
 
-        //bidKey = "98223"; // original bid ID set for bidKey
-        //bidKey = "81623"; // custom bid ID // first bid Id listed with key 178
-        bidKey = "86635"; // custom bid ID // second to last bid Id listed with key 178
-        //bidKey = "93616"; // custom bid ID // last bid Id listed with key 178
+        // following bidKey values are used with the CSV file "CS 300 eBid_Monthly_Sales.csv" (12023 entries)
+        bidKey = "98223"; // original bid ID set for bidKey // works with remove() function
+        
+        //bidKey = "81623"; // custom bid ID // first bid Id listed with key 178 // terminate called after throwing an instance of 'std::out_of_range'
+                                                                                 // what():  vector::_M_range_check: __n (which is 178) >= this->size() (which is 178)
+        
+        //bidKey = "86635"; // custom bid ID // second to last bid Id listed with key 178 // terminate called after throwing an instance of 'std::out_of_range'
+                                                                                        // what():  vector::_M_range_check: __n (which is 178) >= this->size() (which is 178)
+        
+        //bidKey = "93616"; // custom bid ID // last bid Id listed with key 178 // terminate called after throwing an instance of 'std::out_of_range'
+                                                                              // what():  vector::_M_range_check: __n (which is 178) >= this->size() (which is 178)
     }
 
     // Define a timer variable
@@ -416,6 +403,7 @@ int main(int argc, char* argv[]) {
     bidTable = new HashTable();
     
     int choice = 0;
+    int i=0;
     while (choice != 9) {
         cout << "Menu:" << endl;
         cout << "  1. Load Bids" << endl;
@@ -425,6 +413,20 @@ int main(int argc, char* argv[]) {
         cout << "  9. Exit" << endl;
         cout << "Enter choice: ";
         cin >> choice;
+
+        // if bids have already been loaded, loading them again can cause an out_of_range error
+        while (choice == 1 && i != 0) {
+            cout << endl << "Bids have already been loaded. Please select another option." << endl;
+            cout << "Menu:" << endl;
+            cout << "  1. Load Bids" << endl;
+            cout << "  2. Display All Bids" << endl;
+            cout << "  3. Find Bid" << endl;
+            cout << "  4. Remove Bid" << endl;
+            cout << "  9. Exit" << endl;
+            cout << "Enter choice: ";
+            cin >> choice;
+        }
+        i++;
 
         switch (choice) {
 
@@ -450,10 +452,6 @@ int main(int argc, char* argv[]) {
             ticks = clock();
 
             bid = bidTable->Search(bidKey);
-            cout << "Bid Id " << bid.bidId << endl;
-            cout << "Bid Title " << bid.title << endl;
-            cout << "Bid Fund " << bid.fund << endl;
-            cout << "Bid Amount " << bid.amount << endl;
 
             ticks = clock() - ticks; // current clock ticks minus starting clock ticks
 
