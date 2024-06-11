@@ -187,9 +187,8 @@ Bid BinarySearchTree::Search(string bidId) {
         // if bid is smaller than current node then traverse left
         // else larger so traverse right
     Node *current = root;
-    bool found = true;
 
-    while (root != nullptr) {
+    while (current != nullptr) {
         if (current->bid.bidId == bidId) { // node's bidId matches search bidId
             return current->bid;
         }
@@ -439,7 +438,7 @@ int main(int argc, char* argv[]) {
         bidKey = argv[2];
         break;
     default:
-        csvPath = "eBid_Monthly_Sales.csv";
+        csvPath = "CS 300 eBid_Monthly_Sales.csv";
         bidKey = "98223";
     }
 
