@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <time.h>
-
+#include <algorithm>
 #include "CSVparser.hpp"
 
 using namespace std;
