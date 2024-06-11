@@ -439,7 +439,7 @@ int main(int argc, char* argv[]) {
         bidKey = argv[2];
         break;
     default:
-        csvPath = "eBid_Monthly_Sales.csv";
+        csvPath = "CS 300 eBid_Monthly_Sales.csv";
         bidKey = "98223";
     }
 
