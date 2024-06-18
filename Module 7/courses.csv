@@ -1,0 +1,37 @@
+
+CS101,Intro to Computer Science
+CS190,Python Programming,CS101
+CS200,Advanced Python,CS190
+CS201,Java Programming,CS101
+CS202,Advanced Java,CS201
+CS300,Data Structures,CS200
+CS301,Algorithms,CS300
+CS302,Advanced Algorithms,CS301,CS300
+CS303,Machine Learning,CS302
+CS304,Deep Learning,CS303
+CS305,Reinforcement Learning,CS304
+CS306,Computer Vision,CS305
+CS307,Natural Language Processing,CS306
+CS308,Speech Processing,CS307
+CS309,Robotics,CS308
+CS310,Artificial Intelligence,CS309,MAT113
+CS311,Computer Graphics,CS310,MAT114
+CS312,Game Development,CS311
+CS313,Virtual Reality,CS312
+CS314,Quantum Computing,CS313,MAT116
+MAT101,Algebra
+MAT102,Calculus,MAT101
+MAT103,Linear Algebra,MAT102
+MAT104,Discrete Mathematics,MAT103
+MAT105,Probability and Statistics,MAT104
+MAT106,Mathematical Logic,MAT105
+MAT107,Number Theory,MAT106
+MAT108,Graph Theory,MAT107
+MAT109,Combinatorics,MAT108
+MAT110,Topology,MAT109
+MAT111,Geometry,MAT110
+MAT112,Trigonometry,MAT111
+MAT113,Calculus II,MAT102
+MAT114,Calculus III,MAT113
+MAT115,Calculus IV,MAT114
+MAT116,Advanced Calculus,MAT115
