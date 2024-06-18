@@ -117,9 +117,6 @@ HashTable::HashTable(unsigned int size) {
 HashTable::~HashTable() {
     // FIXME (2): Implement logic to free storage when class is destroyed
 
-    // // erase nodes beginning
-    // nodes.erase(nodes.begin());
-
     /*
     commented out the above line because it can lead to memory leaks
     since the nodes are not deleted from memory but rather just removed
