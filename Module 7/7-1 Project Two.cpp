@@ -43,6 +43,7 @@ public:
 private:
     Node *root;
 
+    void bstDeconstructor(Node *node);
     void addNode(Node *node, CourseInfo course);
     void inOrder(Node *node); //prints in order
     void validateData(Node *node);
@@ -55,29 +56,9 @@ BinarySearchTree::BinarySearchTree() {
 }
 
 
+
 BinarySearchTree::~BinarySearchTree() {
-    // recurse from root deleting every node
-
-    while (root != nullptr) { // starting from root, traverse down left-most node until leaf node found
-        Node *current = root; // alias of root to work with to maintain root as reference
-        // improve readability by using bool flags to track search status
-        bool foundLeft = true;
-        bool foundRight = true;
-
-        while (foundLeft || foundRight){ // current node is not a leaf node
-            if (current->left != nullptr) { // only check for left node until no left node found
-                current = current->left;
-                continue;
-            }
-            foundLeft = false; // found no left node
-            if (current->right != nullptr) { // check for right node
-                current = current->right;
-                continue;
-            }
-            foundRight = false; // no right node
-        }
-        delete current; // found leaf node, delete it
-    }
+    bstDeconstructor(root);
 }
 
 
@@ -126,6 +107,16 @@ bool BinarySearchTree::CheckIfRepeated(CourseInfo course) {
 }
 
 
+// Recursive function to delete all nodes in the tree
+void BinarySearchTree::bstDeconstructor(Node *node) {
+    if (node != nullptr) {
+        bstDeconstructor(node->left);
+        bstDeconstructor(node->right);
+        delete node;
+    }
+}
+
+
 void BinarySearchTree::addNode(Node *node, CourseInfo course) {
     Node *current = node;
     while (current != nullptr) {
@@ -159,9 +150,9 @@ void BinarySearchTree::inOrder(Node *node) {
         inOrder(node->left);
 
         // Output formatted course information
-        cout << "\n\u2502 Course code: " << node->course.code << endl; // Unicode: u2502='┊'
-        cout << "\u2502 Course name: " << node->course.name << endl; // Unicode: u2502='┊'
-        cout << "\u2502 Prerequisites: "; // Unicode: u2502='┊'
+        cout << "\n│ Course code: " << node->course.code << endl; // Unicode: '│'=u2502
+        cout << "│ Course name: " << node->course.name << endl; // Unicode: '│'=u2502
+        cout << "│ Prerequisites: "; // Unicode: '│'=u2502
         for (string prereq : node->course.prerequisites) {
             //check if prereq is the last element in the vector for formatting
             if (prereq == node->course.prerequisites.back()) {
@@ -171,9 +162,9 @@ void BinarySearchTree::inOrder(Node *node) {
                 cout << prereq << ", ";
             }
         }
-        cout << "\n\u251C"; // Unicode: u251c='├'
+        cout << "\n├"; // Unicode: '├'=u251C
         for (int i = 0; i < NUM_CHARS; ++i) {
-            cout << "\u2500"; // Unicode: u2500='─'
+            cout << "─"; // Unicode: '─'=u2500
         }
 
         inOrder(node->right);
@@ -189,10 +180,10 @@ void BinarySearchTree::validateData(Node *node) {
 
         // Output formatted course information
         if (node->course.prerequisites.size() != 0) {
-            cout << "\u2502 Validating " << node->course.code << "'s prerequisites..." << endl; // Unicode: u2502='┊'
+            cout << "│ Validating " << node->course.code << "'s prerequisites..." << endl; // Unicode: '│'=u2502
         }
         else {
-            cout << "\u2502 No prerequisites for course " << node->course.code << endl; // Unicode: u2502='┊'
+            cout << "│ No prerequisites for course " << node->course.code << endl; // Unicode: '│'=u2502
         }
         int currLoop = 1; // tracks the current loop iteration for formatting
         int numPrereqs = node->course.prerequisites.size();
@@ -203,9 +194,9 @@ void BinarySearchTree::validateData(Node *node) {
             // Search for the prerequisite in the tree
             if (Search(prereq).code.empty()) {
                 // Formats the output with a horizontal line
-                cout << "\u251C"; // Unicode: u251c='├'
+                cout << "├"; // Unicode: '├'=u251C
                 for (int i = 0; i < NUM_CHARS; ++i) {
-                    cout << "\u2500"; // Unicode: u2500='─'
+                    cout << "─"; // Unicode: '─'=u2500
                 }
                 cout << endl;
                 cout << ("Prerequisite not found. Invalid data.\n");
@@ -219,19 +210,19 @@ void BinarySearchTree::validateData(Node *node) {
             }
             // Handles output formatting for the last prerequisite
             if (currLoop != numPrereqs && numPrereqs > 1) {
-                cout << "\u2502" << string(14,' ') << "\u251C\u2500"<< prereq << "\u2500"; // Unicode: u251c='├' \u2500='─'
+                cout << "│" << string(14,' ') << "├─"<< prereq << "─"; // Unicode: '│'=u2502 u251c='├' \u2500='─'
             }
             else if ((currLoop == 0 && numPrereqs == 1) || currLoop == numPrereqs) {
-                cout << "\u2502" << string(14,' ') << "\u2514\u2500"<< prereq << "\u2500"; // Unicode: u2502='\u2502' u2514='└' u2500='─'
+                cout << "│" << string(14,' ') << "└─"<< prereq << "─"; // Unicode: '│'=u2502 '─'=u2500 '└'=u2514
             }
 
             cout << "valid course" << endl;
             currLoop++;
         }
         // Formats the output with a horizontal line
-        cout << "\u251C"; // Unicode: u251c='├'
+        cout << "├"; // Unicode: '├'=u251C
         for (int i = 0; i < NUM_CHARS; ++i) {
-            cout << "\u2500"; // Unicode: u2500='─'
+            cout << "─"; // Unicode: '─'=u2500
         }
         cout << endl;
 
@@ -302,22 +293,22 @@ int loadInfo(string csvFile, BinarySearchTree *bst) {
 
 
 void printSearchResults(CourseInfo course) {
-    const int NUM_CHARS_TOP = 29;
+    const int NUM_CHARS_TOP = 30;
     const int NUM_CHARS_BOTTOM = 41;
     if (!course.code.empty()) {
         // Formatting for the first line of box
         cout << "Found!\n";
-        cout << "\u250C"; // Unicode: u250C='┌'
+        cout << "┌"; // Unicode: '┌'=u250C
         for (int i = 0; i < NUM_CHARS_TOP; ++i) {
-            if (i==1) {cout << "Course\u2500Info";}
-            cout << "\u2500"; // Unicode: u2500='─'
+            if (i==1) {cout << "Course─Info";} // Unicode: '─'=u2500
+            cout << "─"; // Unicode: '─'=u2500
         }
         cout << endl;
 
         // Formatting for the content of the box
-        cout << "\u2502 Code: " << course.code << endl; // Unicode: u2502='┊'
-        cout << "\u2502 Name: " << course.name << endl; // Unicode: u2502='┊'
-        cout << "\u2502 Prerequisite(s): "; // Unicode: u2502='┊'
+        cout << "│ Code: " << course.code << endl; // Unicode: '│'=u2502
+        cout << "│ Name: " << course.name << endl; // Unicode: '│'=u2502
+        cout << "│ Prerequisite(s): "; // Unicode: '│'=u2502
         for (string prereq : course.prerequisites) {
             //check if prereq is empty
             if (prereq.length() == 0) {
@@ -334,9 +325,9 @@ void printSearchResults(CourseInfo course) {
         cout << endl;
 
         // Formatting for the last line of the box
-        cout << "\u2514"; // Unicode: u2514='└'
+        cout << "└"; // Unicode: '└'=u2514
         for (int i = 0; i < NUM_CHARS_BOTTOM; ++i) {
-            cout << "\u2500"; // Unicode: u2500='─'
+            cout << "─"; // Unicode: '─'=u2500
         }
         cout << endl;
     } 
@@ -347,7 +338,7 @@ void printSearchResults(CourseInfo course) {
 
 
 void clearPrevOutput() {
-    std::cout << "\0338"; // ANSI escape code to restore cursor position
+    cout << "\0338"; // ANSI escape code to restore cursor position
     cout << "\033[J"; // ANSI escape code to clear screen
 }
 
@@ -356,25 +347,39 @@ int main() {
     clock_t ticks;
     int numEntries;
     string searchName;
-    string csvFile = "courses.csv";
+    string csvFile;
     BinarySearchTree *bst= new BinarySearchTree();
     CourseInfo course;
 
-    cout << "\u250C"; for (int i=0; i<40; i++){cout << "\u2500";} cout << "\u2510" << endl; // Unicode: u250C='┌' u2500='─' u2510='┐'
-    cout << "\u2502Welcome to the Course Information System\u2502\n";
-    cout << "\u2514"; for (int i=0; i<40; i++){cout << "\u2500";} cout << "\u2518" << endl; // Unicode: u250C='┌' u2500='─' u2518='┘'
 
+    cout << "┌"; for (int i=0; i<40; i++){cout << "─";} cout << "┐" << endl; // Unicode: '┌'=u250C '─'=u2500 '┐'=u2510
+    cout << "│Welcome to the Course Information System│\n"; // Unicode: '│'=u2502
+    cout << "└"; for (int i=0; i<40; i++){cout << "─";} cout << "┘" << endl; // Unicode: u2514= '─'=u2500 '┘'=u2518
+
+    cout << "\0337"; // ANSI escape code to save cursor position
+    cout << "To begin, please enter the name of the CSV file: \n";
+    cin >> csvFile;
+    clearPrevOutput();
+
+    cout << "Current working CSV file: " << csvFile << ".csv\n\n" << flush;
+    
     int userChoice = 0;
     cout << "\0337"; // ANSI escape code to save cursor position
     while (userChoice != 9) {
+        //check if '.csv' is in the file name
+        if (csvFile.find(".csv") == string::npos) {
+            csvFile += ".csv";
+        }
+        
         // Display menu
         cout << endl;
-        for (int i=0; i<10; i++){cout << "\u2500";} // Unicode: u2500='─'
+        for (int i=0; i<10; i++){cout << "─";} // Unicode: '─'=u2500
         cout << "Please enter an option";
-        for (int i=0; i<10; i++){cout << "\u2500";} // Unicode: u2500='─'
+        for (int i=0; i<10; i++){cout << "─";} // Unicode: '─'=u2500
         cout << "\n1. Load CSV file" << endl;
         cout << "2. Search using course code" << endl;
         cout << "3. Sort in order by course code" << endl;
+        cout << "4. Change CSV file" << endl;
         cout << "9. Quit" << endl;
         cout << "Enter choice: ";
         cin >> userChoice;
@@ -393,12 +398,17 @@ int main() {
                 printf("%d new entries loaded.\n", numEntries);
                 printf("Loaded CSV file in %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
 
+                if (numEntries == 0) {
+                    cout << "No new entries. Skipping validation...\n";
+                    break;
+                }
+
                 // validate data after loading
                 cout << "\n\nValidating courses...\n";
                 
                 this_thread::sleep_for(chrono::milliseconds(1500)); // pause for 1.5 seconds
 
-                cout << "\u250C"; for (int i=0; i<41; i++){cout << "\u2500";} cout << endl; // Unicode: u250C='┌' u2500='─'
+                cout << "┌"; for (int i=0; i<41; i++){cout << "─";} cout << endl; // Unicode: '┌'=u250C '─'=u2500
                 ticks = clock();
                 bst->ValidateData();
                 ticks = clock() - ticks;
@@ -406,7 +416,7 @@ int main() {
                 break;
             // Search using course code
             case 2:
-                cout << endl << "Please enter a code to Search: \n";
+                cout << "\nPlease enter a code to Search: " << endl;
                 cin >> searchName;
                 clearPrevOutput();
 
@@ -422,9 +432,31 @@ int main() {
                 cout << "Printing all data...\n";
                 ticks = clock();
                 bst->InOrder();
-                printf("Courses sorted %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
+                printf("\nCourses sorted %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
                 break;
+            // Change CSV file
+            case 4:
+                const int NUM_CHARS = 42;
+                const string warn = "WARNING!";
+                cout << string((NUM_CHARS-warn.length())/2, '=') << warn << string((NUM_CHARS-warn.length())/2, '=') << endl;
+                cout << "The new CSV file needs to be loaded again.\n";
+                cout << "This will add any new courses from the CSV\nfile to the existing data." << endl;
+                cout << string(NUM_CHARS, '=') << endl;
+                cout << "Are you sure you want to continue? (y/n): ";
+                char choice;
+                cin >> choice;
+                clearPrevOutput();
+                if (choice == 'y') {
+                    cout << "Please enter the name of the CSV file: ";
+                    cin >> csvFile;
+                    clearPrevOutput();
+                }
         }
     }
     return 0;
 }
+
+// Changed deconstructor method.
+
+// Replaced escape sequences with direct characters.
+// Updated switch case 1 to skip course validation if no new courses are loaded.
