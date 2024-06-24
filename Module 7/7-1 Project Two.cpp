@@ -1,13 +1,17 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <time.h>
-#include <sstream>
+#include <iostream> 
+#include <fstream> // file I/O for reading CSV file
+#include <vector> 
+#include <string> 
+#include <algorithm> // transform() for case-insensitive search
+#include <time.h> // clock() for timing
+#include <sstream> // stringstream for parsing
 
-#include <thread>
-#include <chrono>
+#include <thread> // for sleep_for function 
+#include <chrono> // for milliseconds
+
+//Last compiled successfully on June 23, 2024
+//Last tested successfully on June 23, 2024
+//Compiled and tested using: C++17 and gcc-14 (Homebrew GCC 14.1.0_1) 14.1.0
 
 using namespace std;
 
@@ -17,7 +21,7 @@ struct CourseInfo {
     vector<string> prerequisites;
 };
 struct Node {
-    CourseInfo course; 
+    CourseInfo course;
     Node *left;
     Node *right;
 
@@ -38,7 +42,7 @@ public:
     void InOrder();
     CourseInfo Search(string code);
     void Insert(CourseInfo course);
-    void ValidateData();
+    void ValidateData(bool printLog);
     bool CheckIfRepeated(CourseInfo course);
 private:
     Node *root;
@@ -46,8 +50,9 @@ private:
     void bstDeconstructor(Node *node);
     void addNode(Node *node, CourseInfo course);
     void inOrder(Node *node); //prints in order
-    void validateData(Node *node);
+    void validateData(Node *node, bool printLog);
     bool checkIfRepeated(CourseInfo course);
+
 };
 
 
@@ -78,7 +83,7 @@ CourseInfo BinarySearchTree::Search(string code) {
             current = current->left;
         }
         else { // node's code is smaller than search code
-            current = current->right; 
+            current = current->right;
         }
     }
     // can only be reached if course not found, otherwise this won't run
@@ -97,8 +102,8 @@ void BinarySearchTree::Insert(CourseInfo course) {
 }
 
 
-void BinarySearchTree::ValidateData() {
-    validateData(root);
+void BinarySearchTree::ValidateData(bool printLog) {
+    validateData(root, printLog);
 }
 
 
@@ -116,7 +121,7 @@ void BinarySearchTree::bstDeconstructor(Node *node) {
     }
 }
 
-
+// Recursive function to add a node to the tree
 void BinarySearchTree::addNode(Node *node, CourseInfo course) {
     Node *current = node;
     while (current != nullptr) {
@@ -143,7 +148,7 @@ void BinarySearchTree::addNode(Node *node, CourseInfo course) {
     }
 }
 
-
+// Recursive function to print the tree in order (least to greatest)
 void BinarySearchTree::inOrder(Node *node) {
     const int NUM_CHARS = 41;
     if (node != nullptr) {
@@ -162,10 +167,7 @@ void BinarySearchTree::inOrder(Node *node) {
                 cout << prereq << ", ";
             }
         }
-        cout << "\n├"; // Unicode: '├'=u251C
-        for (int i = 0; i < NUM_CHARS; ++i) {
-            cout << "─"; // Unicode: '─'=u2500
-        }
+        cout << "\n├─────────────────────────────────────────";
 
         inOrder(node->right);
     }
@@ -173,10 +175,25 @@ void BinarySearchTree::inOrder(Node *node) {
 
 
 // Validates data by traversing the tree in order and then searching the tree for each prerequisite
-void BinarySearchTree::validateData(Node *node) {
-    const int NUM_CHARS = 41;
+void BinarySearchTree::validateData(Node *node, bool printLog) {
+    // Will not print any output if printLog is false, will only output for invalid prerequisites
+    if (!printLog) {
+        if (node != nullptr) {
+            validateData(node->left, printLog);
+            for (string prereq : node->course.prerequisites) {
+                if (Search(prereq).code.empty()) {
+                    cout << "Prerequisite " << prereq << " not listed as course.\nExiting...\n";
+                    exit(1);
+                }
+            }
+            validateData(node->right, printLog);
+        }
+        return;
+    }
+
+    // More verbose output for validation
     if (node != nullptr) {
-        validateData(node->left); 
+        validateData(node->left, printLog);
 
         // Output formatted course information
         if (node->course.prerequisites.size() != 0) {
@@ -194,13 +211,8 @@ void BinarySearchTree::validateData(Node *node) {
             // Search for the prerequisite in the tree
             if (Search(prereq).code.empty()) {
                 // Formats the output with a horizontal line
-                cout << "├"; // Unicode: '├'=u251C
-                for (int i = 0; i < NUM_CHARS; ++i) {
-                    cout << "─"; // Unicode: '─'=u2500
-                }
-                cout << endl;
-                cout << ("Prerequisite not found. Invalid data.\n");
-                cout << "Exiting...\n";
+                cout << "├─────────────────────────────────────────\n"; // Unicode: '├'=u251C
+                printf("└─ Prerequisite %s not listed as course.\nExiting...\n", prereq.c_str());
 
                 exit(1);
             }
@@ -219,18 +231,15 @@ void BinarySearchTree::validateData(Node *node) {
             cout << "valid course" << endl;
             currLoop++;
         }
-        // Formats the output with a horizontal line
-        cout << "├"; // Unicode: '├'=u251C
-        for (int i = 0; i < NUM_CHARS; ++i) {
-            cout << "─"; // Unicode: '─'=u2500
-        }
-        cout << endl;
 
-        validateData(node->right);
+        cout << "├─────────────────────────────────────────\n"; // Unicode: '├'=u251C '─'=u2500
+
+        validateData(node->right, printLog);
     }
 }
 
 
+// Checks if a course is already in the tree
 bool BinarySearchTree::checkIfRepeated(CourseInfo aCourse) {
     CourseInfo course = Search(aCourse.code);
     if (course.code.empty() == false) {
@@ -240,12 +249,13 @@ bool BinarySearchTree::checkIfRepeated(CourseInfo aCourse) {
 }
 
 
+// Load course information from a CSV file into the BST
 int loadInfo(string csvFile, BinarySearchTree *bst) {
     int numEntries = 0;
     // Open file
     ifstream file(csvFile);
     if (!file.is_open()){
-        throw runtime_error("Could not open file");
+        throw runtime_error("\nCould not open file");
     }
     // Read file line by line
     string line;
@@ -271,8 +281,10 @@ int loadInfo(string csvFile, BinarySearchTree *bst) {
             throw runtime_error("Invalid number of columns, minimum 2 columns required");
         }
         CourseInfo course;
+        // Tokens 0 and 1 are course code and name respectively
         course.code = tokens[0];
         course.name = tokens[1];
+        // Tokens 2 and onwards are prerequisites
         for (int i = 2; i < tokens.size(); i++) {
             course.prerequisites.push_back(tokens[i]);
         }
@@ -292,17 +304,14 @@ int loadInfo(string csvFile, BinarySearchTree *bst) {
 }
 
 
+// Print search results in a box format
 void printSearchResults(CourseInfo course) {
     const int NUM_CHARS_TOP = 30;
     const int NUM_CHARS_BOTTOM = 41;
     if (!course.code.empty()) {
         // Formatting for the first line of box
         cout << "Found!\n";
-        cout << "┌"; // Unicode: '┌'=u250C
-        for (int i = 0; i < NUM_CHARS_TOP; ++i) {
-            if (i==1) {cout << "Course─Info";} // Unicode: '─'=u2500
-            cout << "─"; // Unicode: '─'=u2500
-        }
+        cout << "┌─Course─Info─────────────────────────────"; // Unicode: '┌'=u250C '─'=u2500
         cout << endl;
 
         // Formatting for the content of the box
@@ -325,138 +334,227 @@ void printSearchResults(CourseInfo course) {
         cout << endl;
 
         // Formatting for the last line of the box
-        cout << "└"; // Unicode: '└'=u2514
-        for (int i = 0; i < NUM_CHARS_BOTTOM; ++i) {
-            cout << "─"; // Unicode: '─'=u2500
-        }
+        cout << "└─────────────────────────────────────────"; // Unicode: '└'=u2514 '─'=u2500
         cout << endl;
-    } 
+    }
     else {
         cout << "\nNo results found.\n";
     }
 }
 
 
-void clearPrevOutput() {
-    cout << "\0338"; // ANSI escape code to restore cursor position
-    cout << "\033[J"; // ANSI escape code to clear screen
+// ANSI escape codes for cursor position
+void cursorPos(string cursorPos = "start") {
+    if (cursorPos == "start") {
+        cout << "\0337"; // ANSI escape code to save cursor position
+    }
+    else if (cursorPos == "delete") { // delete lines up to where the cursor was saved
+        cout << "\0338"; // ANSI escape code to restore cursor position
+        cout << "\033[J"; // ANSI escape code to clear screen
+    }
 }
 
 
+    /*
+    ANSI color codes(from https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797)
+    30: Black
+    31: Red
+    32: Green
+    33: Yellow
+    34: Blue
+    35: Magenta1
+    36: Cyan
+    37: White
+    @param text: text to color
+    @param color: ANSI escape code for color
+    */
+void colorText(string text, int color) {
+    printf("\x1b[1m\x1b[%dm%s\x1b[0m\n", color, text.c_str()); // ANSI escape codes to change text color then reset
+}
+
+
+// Function to delay execution and print periods
+void delayExecution(string message, int numPeriods = 3) {
+    int delayTime = 1000/3 * numPeriods; // third of a second delay to print each period
+    cout << endl << message << flush;
+    for (int i=0; i<numPeriods; i++) {;
+        cout << "." << flush;
+        this_thread::sleep_for(chrono::milliseconds(delayTime));
+    }
+    cout << endl;
+}
+
+
+void printMenu() {
+    cout << "──────────Please select an option──────────" << endl;  // Unicode: '─'=u2500
+    cout << "1. Load CSV file" << endl;
+    cout << "2. Search using course code" << endl;
+    cout << "3. Sort in order by course code" << endl;
+    cout << "4. Change CSV file" << endl;
+    cout << "9. Quit" << endl;
+    cout << "Enter choice[1-4/9]: \n❯ ";
+}
+
 int main() {
+    if (__cplusplus == 202101L) std::cout << "C++23";
+    else if (__cplusplus == 202002L) std::cout << "C++20";
+    else if (__cplusplus == 201703L) std::cout << "C++17";
+    else if (__cplusplus == 201402L) std::cout << "C++14";
+    else if (__cplusplus == 201103L) std::cout << "C++11";
+    else if (__cplusplus == 199711L) std::cout << "C++98";
+    else std::cout << "pre-standard C++." << __cplusplus;
+    std::cout << "\n";
+    
+    // Valid user choices
+    int validChoices[] = {1, 2, 3, 4, 9};
+    // For logging purposes
     clock_t ticks;
     int numEntries;
+    bool printLog = false;
+    // User input variables
     string searchName;
     string csvFile;
+    string fileExtension = ".csv";
+    // Create data structure
     BinarySearchTree *bst= new BinarySearchTree();
     CourseInfo course;
 
-
-    cout << "┌"; for (int i=0; i<40; i++){cout << "─";} cout << "┐" << endl; // Unicode: '┌'=u250C '─'=u2500 '┐'=u2510
+    // Display welcome message
+    cout << "┌────────────────────────────────────────┐" << endl; // Unicode: '┌'=u250C '─'=u2500 '┐'=u2510
     cout << "│Welcome to the Course Information System│\n"; // Unicode: '│'=u2502
-    cout << "└"; for (int i=0; i<40; i++){cout << "─";} cout << "┘" << endl; // Unicode: u2514= '─'=u2500 '┘'=u2518
+    cout << "└────────────────────────────────────────┘" << endl; // Unicode: u2514= '─'=u2500 '┘'=u2518
 
-    cout << "\0337"; // ANSI escape code to save cursor position
-    cout << "To begin, please enter the name of the CSV file: \n";
-    cin >> csvFile;
-    clearPrevOutput();
-
-    cout << "Current working CSV file: " << csvFile << ".csv\n\n" << flush;
+    cursorPos(); // Save cursor position
     
+    cout << "To begin, please enter the name of the CSV file: \n❯ "; // Unicode: '❯'=u276F
+    cin >> csvFile;
+
+    cursorPos("delete"); // Delete previous lines
+
     int userChoice = 0;
-    cout << "\0337"; // ANSI escape code to save cursor position
+
+    cursorPos();
+    cout << flush;
+    //Enter main menu loop
     while (userChoice != 9) {
+
         //check if '.csv' is in the file name
-        if (csvFile.find(".csv") == string::npos) {
-            csvFile += ".csv";
+        if (csvFile.find(fileExtension) == string::npos) {
+            csvFile += fileExtension;
         }
-        
-        // Display menu
-        cout << endl;
-        for (int i=0; i<10; i++){cout << "─";} // Unicode: '─'=u2500
-        cout << "Please enter an option";
-        for (int i=0; i<10; i++){cout << "─";} // Unicode: '─'=u2500
-        cout << "\n1. Load CSV file" << endl;
-        cout << "2. Search using course code" << endl;
-        cout << "3. Sort in order by course code" << endl;
-        cout << "4. Change CSV file" << endl;
-        cout << "9. Quit" << endl;
-        cout << "Enter choice: ";
+
+        cout << "\n\nCurrent working CSV file: ";
+        colorText(csvFile, 32); // Makes output green
+
+        printMenu();
         cin >> userChoice;
 
-        // Delete lines prior to user input
-        clearPrevOutput();
+        // Check if user input is valid
+        if (find(begin(validChoices), end(validChoices), userChoice) == end(validChoices) || cin.fail()) {
+            // Clear cin buffer and ignore invalid input
+            cin.clear(); 
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
+            cursorPos("delete");
+            cout << endl << endl;
+            cout << "==========================================\n"; 
+            cout << "Invalid input. Please enter a valid choice" << endl;
+            cout << "==========================================\n";
+            continue;
+        }
+
+        cursorPos("delete");
+        
         // Process user choice
         switch (userChoice) {
             // Load CSV file
             case 1:
-                cout << "\nLoading CSV file...\n";
+                cout << "\n\nLoading CSV file...\n";
+
                 ticks = clock();
                 numEntries = loadInfo(csvFile, bst);
                 ticks = clock() - ticks;
-                printf("%d new entries loaded.\n", numEntries);
-                printf("Loaded CSV file in %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
 
+                printf("%d new entries loaded.\n", numEntries);
+                printf("Loaded CSV file in %5f seconds.\n\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
+                
                 if (numEntries == 0) {
                     cout << "No new entries. Skipping validation...\n";
                     break;
                 }
 
-                // validate data after loading
-                cout << "\n\nValidating courses...\n";
-                
-                this_thread::sleep_for(chrono::milliseconds(1500)); // pause for 1.5 seconds
+                // Delay to read previous messages since validation can fill the console
+                delayExecution("About to start validation", 3);
 
-                cout << "┌"; for (int i=0; i<41; i++){cout << "─";} cout << endl; // Unicode: '┌'=u250C '─'=u2500
+                if (printLog) { // Only prints if true for formatting
+                    cout << "┌─────────────────────────────────────────" << endl; // Unicode: '┌'=u250C '─'=u2500
+                }
+
                 ticks = clock();
-                bst->ValidateData();
+                bst->ValidateData(printLog); // Validate data, printLog bool determines if verbose output is printed. Default is "true".
                 ticks = clock() - ticks;
-                printf("Validated courses %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
+
+                printf("Validated courses in %5f seconds.\n", ticks*1.0/CLOCKS_PER_SEC);
                 break;
             // Search using course code
             case 2:
-                cout << "\nPlease enter a code to Search: " << endl;
+                cout << "\n\nPlease enter a code to Search: \n❯ ";
                 cin >> searchName;
-                clearPrevOutput();
 
-                printf("\nSearching for \"%s\"...", searchName.c_str());
+                cursorPos("delete");
+
+                // Convert searchName to uppercase for case-insensitive search
+                transform(searchName.begin(), searchName.end(), searchName.begin(), ::toupper);
+
+                printf("\n\nSearching for \"%s\"...", searchName.c_str());
+
                 ticks = clock();
                 course = bst->Search(searchName);
                 ticks = clock() - ticks;
+
                 printSearchResults(course);
-                printf("Search took %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
+                printf("Search took %5f seconds.\n", ticks*1.0/CLOCKS_PER_SEC);
                 break;
             // Sort in order by course code
             case 3:
-                cout << "Printing all data...\n";
+                cout << "\n\nPrinting all course data...\n";
+                cout << "┌─────────────────────────────────────────"; // Unicode: '┌'=u250C '─'=u2500
+
                 ticks = clock();
                 bst->InOrder();
-                printf("\nCourses sorted %5f seconds.\n", (clock() - ticks)*1.0/CLOCKS_PER_SEC);
+                ticks = clock() - ticks;
+
+                printf("\nCourses sorted in %5f seconds.\n", ticks*1.0/CLOCKS_PER_SEC);
                 break;
             // Change CSV file
             case 4:
-                const int NUM_CHARS = 42;
-                const string warn = "WARNING!";
-                cout << string((NUM_CHARS-warn.length())/2, '=') << warn << string((NUM_CHARS-warn.length())/2, '=') << endl;
-                cout << "The new CSV file needs to be loaded again.\n";
-                cout << "This will add any new courses from the CSV\nfile to the existing data." << endl;
-                cout << string(NUM_CHARS, '=') << endl;
-                cout << "Are you sure you want to continue? (y/n): ";
+
+                cout << endl << endl;
+                cout << "=================WARNING!=================\n"; 
+                cout << "The CSV file will need to be loaded again.\n";
+                cout << "This will add any new courses from the CSV\n";
+                cout << "file to the existing data.\n";
+                cout << "==========================================\n";
+                cout << "Are you sure you want to continue? [y/n]: \n❯ "; // Unicode: '❯'=u276F
+
                 char choice;
                 cin >> choice;
-                clearPrevOutput();
+
+                cursorPos("delete");
+
                 if (choice == 'y') {
-                    cout << "Please enter the name of the CSV file: ";
+                    cout << "Please enter the name of the CSV file: \n❯ ";
                     cin >> csvFile;
-                    clearPrevOutput();
+                    cursorPos("delete");
+                    break;
                 }
+                else {
+                    cursorPos("delete");
+                    cout << "\n\nReturning to main menu...\n";
+                    break;
+                }
+                
         }
     }
     return 0;
 }
-
-// Changed deconstructor method.
-
-// Replaced escape sequences with direct characters.
-// Updated switch case 1 to skip course validation if no new courses are loaded.
